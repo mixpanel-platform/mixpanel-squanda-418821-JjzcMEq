@@ -8,8 +8,29 @@
   <body class="mixpanel-platform-body">
     <script>
       MP.api.ready(function() {
-        // Run queries and display results here
-      });
+    // assumes you have an event called 'Button clicked'
+    var eventName = 'inbox_entry_added';
+    var $mau = MP.api.segment(eventName, 'mp_country_code', {
+        from: moment().subtract(1, 'months'),
+        to: moment(),
+        type: 'unique',
+        unit: 'month'
+    });
+
+    var $dau = MP.api.segment(eventName, 'mp_country_code', {
+        from: moment().subtract(1, 'days'),
+        to: moment(),
+        type: 'unique',
+        unit: 'day'
+    });
+
+    $.when($dau, $mau).done(function(dau, mau) {
+        $('<div></div>').appendTo('body').MPChart({
+            chartType: 'map',
+            data: dau.avg().divide(mau.avg())
+        });
+    });
+});
     </script>
   </body>
 </html>
